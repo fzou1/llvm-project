@@ -123,12 +123,13 @@ X86RegisterInfo::getLargestLegalSuperClass(const TargetRegisterClass *RC,
   if (RC == &X86::GR8_NOREXRegClass)
     return RC;
 
+  const X86Subtarget &Subtarget = MF.getSubtarget<X86Subtarget>();
+
   // Keep using non-rex2 register class when APX feature (EGPR/NDD/NF) is not
   // enabled for relocation.
-  if (!X86EnableAPXForRelocation && isNonRex2RegClass(RC))
+  if ((Subtarget.hasNDD() || Subtarget.hasNF() || Subtarget.hasEGPR()) &&
+      !X86EnableAPXForRelocation && isNonRex2RegClass(RC))
     return RC;
-
-  const X86Subtarget &Subtarget = MF.getSubtarget<X86Subtarget>();
 
   const TargetRegisterClass *Super = RC;
   auto I = RC->superclasses().begin();
